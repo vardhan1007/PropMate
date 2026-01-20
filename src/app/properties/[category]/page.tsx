@@ -1,0 +1,293 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Apple, Smartphone, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+// --- UNIQUE TAGLINES FOR EACH CATEGORY ---
+const TAGLINES: Record<string, string> = {
+  retail: "Where flagship ambition meets consumer prestige.",
+  office: "Architectural excellence for the modern corporate legacy.",
+  industrial: "Strategic infrastructure for global scale and efficiency.",
+  villas: "Secluded sanctuaries of unparalleled private luxury.",
+  apartments: "Skyline sophistication redefined for urban icons.",
+  houses: "Timeless architecture crafted for multi-generational comfort.",
+  funds: "Diversified portfolios for the visionary wealth-builder.",
+  lands: "The ultimate canvas for your future architectural masterpiece.",
+  complexes: "Integrated ecosystems designed for multi-dimensional living.",
+};
+
+// --- DYNAMIC MOCK DATA SWITCHER ---
+const GET_CATEGORY_DATA = (cat: string) => {
+
+  const normalizedCat = cat.toLowerCase();
+
+ 
+
+  if (normalizedCat === "industrial") {
+
+    return [
+
+      { id: "1", title: "Omni-Channel Logistics Park", loc: "BHIWANDI", img: "/properties/i1.jpg", price: "₹54.2 Cr" },
+
+      { id: "2", title: "Manesar Manufacturing Hub", loc: "GURGAON", img: "/properties/i2.jpg", price: "₹88.5 Cr" },
+
+      { id: "3", title: "Sri City Precision Unit", loc: "ANDHRA PRADESH", img: "/properties/i3.jpg", price: "₹112.0 Cr" },
+
+      { id: "4", title: "Chakan Industrial Zone", loc: "PUNE", img: "/properties/i4.jpg", price: "₹42.8 Cr" },
+
+    ];
+
+  }
+
+ 
+
+  if (normalizedCat === "office") {
+
+    return [
+
+      { id: "1", title: "Skyline Corporate Hub", loc: "GURGAON", img: "/properties/office-1.jpg", price: "₹45.0 Cr" },
+
+      { id: "2", title: "Zenith Business Park", loc: "MUMBAI (BKC)", img: "/properties/office-2.jpg", price: "₹82.5 Cr" },
+
+      { id: "3", title: "Innovation Tech Center", loc: "BANGALORE", img: "/properties/office-3.jpg", price: "₹38.2 Cr" },
+
+      { id: "4", title: "Legacy Executive Suites", loc: "PUNE", img: "/properties/office-4.jpg", price: "₹21.7 Cr" },
+
+    ];
+
+  }
+
+  if (normalizedCat === "villas") {
+
+    return [
+
+      { id: "1", title: "The Azure Retreat", loc: "GURGAON", img: "/properties/villa-1.jpg", price: "₹45.0 Cr" },
+
+      { id: "2", title: "Infinity Palms Estate", loc: "MUMBAI (BKC)", img: "/properties/villa-2.jpg", price: "₹82.5 Cr" },
+
+      { id: "3", title: "Whispering Woods Manor", loc: "BANGALORE", img: "/properties/villa-3.jpg", price: "₹38.2 Cr" },
+
+      { id: "4", title: "The Heritage Hacienda", loc: "PUNE", img: "/properties/villa-4.jpg", price: "₹21.7 Cr" },
+
+    ];
+
+  }
+
+  if (normalizedCat === "apartments") {
+
+    return [
+
+      { id: "1", title: "The Celestia Penthouse", loc: "MUMBAI (WORLI)", img: "/properties/a1.jpg", price: "₹65.5 Cr" },
+
+      { id: "2", title: "Skyview Signature Suites", loc: "GURGAON (GOLF COURSE RD) ", img: "/properties/a2.jpg", price: "₹28.5 Cr" },
+
+      { id: "3", title: "The Meridian Heights", loc: "BANGALORE", img: "/properties/a3.jpg", price: "₹18.2 Cr" },
+
+      { id: "4", title: "Elysian Urban Lofts", loc: "HYDERABAD", img: "/properties/a4.jpg", price: "₹12.7 Cr" },
+
+    ];
+
+  }
+
+  if (normalizedCat === "houses") {
+
+    return [
+
+      { id: "1", title: "The Verdant Hillside Manor", loc: "GURGAON", img: "/properties/h1.jpg", price: "₹45.0 Cr" },
+
+      { id: "2", title: "The Regal Palladium", loc: "MUMBAI", img: "/properties/h2.jpg", price: "₹82.5 Cr" },
+
+      { id: "3", title: "The Terracotta Sanctuary", loc: "BANGALORE", img: "/properties/h3.jpg", price: "₹38.2 Cr" },
+
+      { id: "4", title: "Lakeside Heritage Estate", loc: "PUNE", img: "/properties/h4.jpg", price: "₹21.7 Cr" },
+
+    ];
+
+  }
+
+  if (normalizedCat === "funds") {
+
+    return [
+
+      { id: "1", title: "Prime Commercial REIT", loc: "MUMBAI (BKC)", img: "/properties/f1.jpg", price: "₹150.0 Cr" },
+
+      { id: "2", title: "Logistics Alpha Fund",loc: "BHIWANDI", img: "/properties/f2.jpg", price: "₹85.5 Cr" },
+
+      { id: "3", title: "Urban Residential Equity", loc: "BANGALORE", img: "/properties/f3.jpg", price: "₹110.2 Cr" },
+
+      { id: "4", title: "Strategic Land Bank", loc: "HYDERABAD", img: "/properties/f4.jpg", price: "₹45.7 Cr" }
+
+    ];
+
+  }
+
+  if (normalizedCat === "land") {
+
+    return [
+
+      { id: "1", title: "The Sovereign Plotted Acres", loc: "GURGAON", img: "/properties/l1.jpg", price: "₹45.0 Cr" },
+
+      { id: "2", title: "Coastal Heritage Domain", loc: "MUMBAI", img: "/properties/l2.jpg", price: "₹82.5 Cr" },
+
+      { id: "3", title: "Golden Harvest Landbank", loc: "BANGALORE", img: "/properties/l3.jpg", price: "₹38.2 Cr" },
+
+      { id: "4", title: "The Industrial Frontier", loc: "PUNE", img: "/properties/l4.jpg", price: "₹21.7 Cr" },
+
+    ];
+
+  }
+
+  if (normalizedCat === "complexes") {
+
+    return [
+
+      { id: "1", title: "The Grand Atrium", loc: "MUMBAI (LOWER PAREL)", img: "/properties/d1.jpg", price: "₹125.0 Cr" },
+
+      { id: "2", title: "Coastal Heritage Domain", loc: "MUMBAI", img: "/properties/d2.jpg", price: "₹82.5 Cr" },
+
+      { id: "3", title: "Golden Harvest Landbank", loc: "BANGALORE", img: "/properties/d3.jpg", price: "₹38.2 Cr" },
+
+      { id: "4", title: "The Industrial Frontier", loc: "PUNE", img: "/properties/d4.jpg", price: "₹21.7 Cr" },
+
+    ];
+
+  }
+
+  return [
+
+    { id: "1", title: "Viceroy Timepieces", loc: "MUMBAI", img: "/properties/retail-watch.jpg", price: "₹35.5 Cr" },
+
+    { id: "2", title: "The Roasted Bean Cafe", loc: "BANGALORE", img: "/properties/coffee-shop.jpg", price: "₹12.2 Cr" },
+
+    { id: "3", title: "Silk & Stones Boutique", loc: "DELHI", img: "/properties/boutique.jpg", price: "₹18.8 Cr" },
+
+    { id: "4", title: "Cornerstone Essentials", loc: "HYDERABAD", img: "/properties/mall.jpg", price: "₹8.1 Cr" },
+
+  ];
+
+};
+
+const LEFT_SLIDES = ["/properties/retail-watch.jpg", "/properties/i1.jpg", "/properties/office-1.jpg", "/properties/villa-1.jpg", "/properties/a1.jpg"];
+const RIGHT_SLIDES = ["/properties/coffee-shop.jpg", "/properties/i2.jpg", "/properties/office-2.jpg", "/properties/villa-2.jpg", "/properties/a2.jpg"];
+
+export default function CategoryPage() {
+  const params = useParams();
+  const category = (params?.category as string) || "Retail";
+  const letters = category.toLowerCase().split("");
+  const currentTagline = TAGLINES[category.toLowerCase()] || "A curated selection for refined tastes";
+  const categoryData = GET_CATEGORY_DATA(category);
+
+  const [leftIndex, setLeftIndex] = useState(0);
+  const [rightIndex, setRightIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const leftInterval = setInterval(() => setLeftIndex((prev) => (prev + 1) % LEFT_SLIDES.length), 3500);
+    const rightInterval = setInterval(() => setRightIndex((prev) => (prev + 1) % RIGHT_SLIDES.length), 5000);
+    return () => { clearInterval(leftInterval); clearInterval(rightInterval); };
+  }, []);
+
+  return (
+    <main className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800">
+      <Navbar isAuthPage={true} />
+
+      <div className="max-w-[1750px] mx-auto px-10 pt-40 pb-24">
+        {/* --- PIXAR-STYLE HEADER --- */}
+        <header className="flex flex-col items-center justify-center min-h-[320px] mb-16 text-center">
+          <div className="flex items-end justify-center">
+            <div className="flex overflow-hidden h-[8rem] md:h-[12rem] items-end pb-2">
+              {letters.map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 + (i * 0.1) }}
+                  className="text-8xl md:text-[11rem] font-extralight text-slate-900 lowercase tracking-tighter leading-none inline-block"
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </div>
+            <motion.span
+              initial={{ y: -800 }}
+              animate={{ y: [0, -120, 0, -50, 0] }}
+              transition={{ duration: 1.5, times: [0, 0.4, 0.6, 0.8, 1], ease: "easeInOut" }}
+              className="w-5 h-5 md:w-7 md:h-7 bg-blue-400 rounded-full mb-5 ml-1 shadow-lg shadow-blue-400/20"
+            />
+          </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="text-[11px] font-medium tracking-[0.4em] text-slate-400 uppercase mt-2 max-w-2xl"
+          >
+            {currentTagline}
+          </motion.p>
+        </header>
+
+        {/* --- UNLOCKED PROPERTY GRID --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-32">
+          {categoryData.map((item, idx) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className={`group relative p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 ${idx % 2 === 0 ? "-rotate-1" : "rotate-1"} hover:rotate-0`}
+            >
+              <Link href={`/properties/${category.toLowerCase()}/${item.id}`}>
+                <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-slate-50 mb-6">
+                  <img src={item.img} className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" alt={item.title} />
+                </div>
+                <div className="text-center pb-4 px-2">
+                  <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.3em]">{item.loc}</span>
+                  <h3 className="text-xl font-serif font-bold text-slate-800 mt-1 leading-tight">{item.title}</h3>
+                  <p className="text-blue-500 font-bold text-sm mt-2">{item.price}</p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* --- FIXED WIDE SLIDESHOW BOX --- */}
+        <section className="pb-32">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="w-full bg-white border border-slate-100 rounded-[3rem] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.06)] relative overflow-hidden group">
+            <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[500px] lg:h-[550px]">
+              <div className="relative h-64 lg:h-full lg:col-span-3 overflow-hidden bg-slate-100 order-2 lg:order-1">
+                <AnimatePresence mode="wait">
+                  <motion.img key={leftIndex} src={LEFT_SLIDES[leftIndex]} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.5 }} className="absolute inset-0 w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 transition-all duration-1000" alt="Preview Left" />
+                </AnimatePresence>
+              </div>
+
+              <div className="relative z-20 flex flex-col justify-center items-center p-12 lg:p-16 text-center lg:col-span-6 bg-white order-1 lg:order-2">
+                <span className="text-blue-500 font-bold text-[10px] uppercase tracking-[0.4em] mb-4 block">Extend your search</span>
+                <h2 className="text-4xl md:text-5xl font-light text-slate-900 tracking-tight mb-6 leading-tight">
+                  Discover the <span className="italic font-serif text-blue-400">exclusive</span> <br /> mobile collection.
+                </h2>
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-slate-900 text-white font-medium text-[13px] tracking-wide px-10 py-4 rounded-full hover:bg-blue-500 transition-all shadow-xl active:scale-95"
+                >
+                  Install Propmate App
+                </button>
+              </div>
+
+              <div className="relative h-64 lg:h-full lg:col-span-3 overflow-hidden bg-slate-100 order-3">
+                <AnimatePresence mode="wait">
+                  <motion.img key={rightIndex} src={RIGHT_SLIDES[rightIndex]} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.5 }} className="absolute inset-0 w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 transition-all duration-1000" alt="Preview Right" />
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+      </div>
+
+      <Footer />
+    </main>
+  );
+}
