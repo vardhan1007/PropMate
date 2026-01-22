@@ -1,13 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
-    // This allows the build to finish even with type errors
+    // Allows the build to finish even with small type errors
     ignoreBuildErrors: true,
   },
   eslint: {
-    // This skips ESLint checks during build to save time
+    // Skips linting during the build to save time and avoid failures
     ignoreDuringBuilds: true,
   },
 };
