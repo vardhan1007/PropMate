@@ -46,7 +46,6 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // UPDATED: Now points to the correct /api subfolder to avoid build conflicts
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,14 +59,14 @@ export default function SignUpPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Redirect to sign in with success message
         router.push("/auth/signin?success=Account Created! Please sign in.");
       } else {
         setError(data.message || "Failed to create account.");
-        setLoading(false);
       }
     } catch (err) {
       setError("Network error. Please try again.");
+    } finally {
+      // CRITICAL FIX: Always stop loading regardless of outcome
       setLoading(false);
     }
   };
@@ -84,7 +83,6 @@ export default function SignUpPage() {
       <div className="flex items-center justify-center p-6 min-h-screen pt-32">
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 rounded-[45px] overflow-hidden shadow-[0_40px_100px_-20px_rgba(7,58,75,0.15)] border border-slate-100">
           
-          {/* Left Panel: Branding */}
           <div className="hidden lg:flex p-20 flex-col justify-center relative overflow-hidden" 
                style={{ background: `linear-gradient(135deg, ${colors.dark} 0%, ${colors.blue} 100%)` }}>
             <div className="absolute top-10 left-10 w-32 h-32 rounded-full blur-3xl opacity-30" style={{ backgroundColor: colors.orange }} />
@@ -102,7 +100,6 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          {/* Right Panel: Form */}
           <div className="bg-white p-10 lg:p-16 flex flex-col justify-center">
             <div className="mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4" 
@@ -171,7 +168,6 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              {/* Human Verification Box */}
               <div onClick={handleVerify} className={`p-4 rounded-2xl border transition-all duration-500 flex items-center justify-between cursor-pointer relative ${isVerified ? 'bg-green-50/50 border-green-200' : 'bg-blue-50/50 border-blue-100'}`}>
                 <div className="flex items-center gap-4">
                   <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isVerified ? 'bg-[#06D7A0] border-[#06D7A0]' : 'bg-white border-blue-200'}`} style={isVerified ? { backgroundColor: colors.green, borderColor: colors.green } : {}}>
@@ -184,7 +180,7 @@ export default function SignUpPage() {
                 <ShieldCheck size={20} style={{ color: isVerified ? colors.green : colors.blue }} className={!isVerified ? 'opacity-50' : ''} />
               </div>
 
-              <button disabled={loading} className="group relative w-full py-5 rounded-2xl overflow-hidden shadow-xl transition-all hover:scale-[1.01] active:scale-95 disabled:grayscale" style={{ backgroundColor: colors.blue, boxShadow: `0 15px 30px -10px ${colors.blue}60` }}>
+              <button type="submit" disabled={loading} className="group relative w-full py-5 rounded-2xl overflow-hidden shadow-xl transition-all hover:scale-[1.01] active:scale-95 disabled:grayscale" style={{ backgroundColor: colors.blue, boxShadow: `0 15px 30px -10px ${colors.blue}60` }}>
                 <span className="relative z-10 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-sm">
                   {loading ? <Loader2 className="animate-spin" /> : "Create Account"}
                   {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}

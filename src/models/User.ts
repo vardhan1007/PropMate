@@ -1,37 +1,14 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, models, model } from "mongoose";
 
-// 1. Define the Schema
 const UserSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: [true, "Please provide a name"],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, "Please provide an email"],
-      unique: true, // Prevents duplicate accounts
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: [true, "Please provide a password"],
-      // We don't set a minLength here because we will store the HASHED version
-    },
-    image: {
-      type: String,
-      default: "", // For future profile picture support
-    },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
   },
-  { 
-    timestamps: true // Automatically adds createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
-// 2. Export the Model
-// 'models.User' checks if the model already exists so we don't redefine it during hot-reloads
+// This check prevents Mongoose from redefining the model during hot-reloads
 const User = models.User || model("User", UserSchema);
-
 export default User;

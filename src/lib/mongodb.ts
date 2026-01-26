@@ -1,17 +1,20 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI; // Grabs your secret link
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable");
+  throw new Error("Please define the MONGODB_URI environment variable in .env.local");
 }
 
-export const connectToDatabase = async () => {
-  try {
-    if (mongoose.connection.readyState >= 1) return; // Already connected
-    await mongoose.connect(MONGODB_URI);
-    console.log("🚀 Connected to PropMate Database");
-  } catch (error) {
-    console.error("❌ Database connection error:", error);
+let cached = (global as any).mongoose || { conn: null, promise: null };
+
+export async function connectToDatabase() {
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    const opts = { bufferCommands: false };
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((m) => m);
   }
-};
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
