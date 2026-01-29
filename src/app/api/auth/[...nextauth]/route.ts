@@ -5,7 +5,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { NextRequest } from "next/server";
 
-// 1. Define authOptions directly here to stop the 'i5' minification error
+// We define authOptions HERE to prevent the "i5" minification crash
 const authOptions: any = {
   providers: [
     CredentialsProvider({
@@ -17,21 +17,15 @@ const authOptions: any = {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) return null;
-          
           await connectToDatabase();
-          
-          const user = await User.findOne({ 
-            email: credentials.email.toLowerCase() 
-          });
-
+          // Added .toLowerCase() to be safe for production
+          const user = await User.findOne({ email: credentials.email.toLowerCase() });
           if (!user) return null;
-
           const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) return null;
-
           return { id: user._id.toString(), email: user.email, name: user.name };
         } catch (error) {
-          console.error("AUTH_DEBUG_ERROR:", error);
+          console.error("AUTH_ERROR:", error);
           return null;
         }
       },
@@ -40,15 +34,13 @@ const authOptions: any = {
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
   pages: { signIn: "/auth/signin" },
-  // Mandatory for production environments with domain mismatches
-  trustHost: true, 
+  trustHost: true, // Tells NextAuth to trust Vercel's proxy headers
 };
 
 const handler = NextAuth(authOptions);
 
-// 2. Next.js 16 Mandatory Promise Wrapper
 export async function GET(req: NextRequest, { params }: { params: Promise<any> }) {
-  const resolvedParams = await params;
+  const resolvedParams = await params; // Mandatory for Next.js 16
   return handler(req, { params: resolvedParams });
 }
 
